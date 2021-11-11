@@ -36,6 +36,37 @@ recordRoutes.route("/record/:id").get(function (req, res) {
         });
 });
 
+// LOGIN : This section will help you get a single record by id
+recordRoutes.route("/record/login").post(function (req, response) {
+    let db_connect = dbo.getDb();
+    let query = {
+        email: req.body.email,
+        password: req.body.password
+    };
+    db_connect
+        .collection("records")
+        .findOne(query, function (err, res) {
+            if (err) throw err;
+            if (res) {
+                let customRes = {
+                    status: "SUCCESS",
+                    message: "User found",
+                    query: query,
+                    mongodb: res
+                }
+                response.json(customRes);
+            } else {
+                let customRes = {
+                    status: "FAILED",
+                    message: "User not found",
+                    query: query,
+                    mongodb: res
+                }
+                response.json(customRes);
+            }
+        });
+});
+
 // This section will help you create a new record.
 recordRoutes.route("/record/add").post(function (req, response) {
     let db_connect = dbo.getDb();
