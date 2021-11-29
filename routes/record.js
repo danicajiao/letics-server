@@ -67,19 +67,18 @@ recordRoutes.route("/record/login").post(function (req, response) {
         });
 });
 
-// This section will help you create a new record.
-recordRoutes.route("/record/add").post(function (req, response) {
+// This section will help you initialize a new record.
+recordRoutes.route("/users/init").post(function (req, response) {
     let db_connect = dbo.getDb();
     let myobj = {
-        username: req.body.username,
-        email: req.body.email,
-        password: req.body.password,
+        firebase_uid: req.body.firebase_uid,
+        workouts: []
     };
-    db_connect.collection("records").insertOne(myobj, function (err, res) {
+    db_connect.collection("users").insertOne(myobj, function (err, res) {
         if (err) throw err;
         let customRes = {
             status: "SUCCESS",
-            message: "User registered successfully",
+            message: "User initialized successfully",
             data: myobj,
             mongodb: res
         }
