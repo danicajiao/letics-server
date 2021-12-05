@@ -103,6 +103,36 @@ recordRoutes.route("/users/:uid/workouts/:workout_id/delete").delete(function (r
         });
 });
 
+// This section will help update a workout by id for the user
+recordRoutes.route("/users/:uid/workouts/:workout_id/update").put(function (req, response) {
+    let db_connect = dbo.getDb();
+    let userQuery = { firebase_uid: req.params.uid };
+    db_connect
+        .collection("users")
+        .findOne(userQuery, function (err, res) {
+            if (err) throw err;
+            if (res) {
+                let workoutQuery = { _id: ObjectId(req.params.workout_id) }
+                let newExercises = {
+                    $set: {
+                        exercises: req.body,
+                    },
+                };
+                db_connect
+                    .collection("workouts")
+                    .updateOne(workoutQuery, newExercises, function (err, result) {
+                        if (err) throw err;
+                        console.log("1 document updated");
+                        response.json(result);
+                    });
+                // .toArray(function (err, result) {
+                //     if (err) throw err;
+                //     response.json(result);
+                // });
+            }
+        });
+});
+
 // This section will help you log a new workout.
 recordRoutes.route("/users/logWorkout").post(function (req, response) {
     let db_connect = dbo.getDb();
@@ -163,35 +193,19 @@ recordRoutes.route("/record/:id").get(function (req, res) {
         });
 });
 
-// LOGIN : This section will help you get a single record by id
-recordRoutes.route("/record/login").post(function (req, response) {
+// This section will help you create a new record.
+recordRoutes.route("/record/add").post(function (req, response) {
     let db_connect = dbo.getDb();
-    let query = {
-        email: req.body.email,
-        password: req.body.password
+    let myobj = {
+        person_name: req.body.person_name,
+        person_position: req.body.person_position,
+        person_level: req.body.person_level,
     };
-    db_connect
-        .collection("records")
-        .findOne(query, function (err, res) {
-            if (err) throw err;
-            if (res) {
-                let customRes = {
-                    status: "SUCCESS",
-                    message: "User found",
-                    query: query,
-                    mongodb: res
-                }
-                response.json(customRes);
-            } else {
-                let customRes = {
-                    status: "FAILED",
-                    message: "User not found",
-                    query: query,
-                    mongodb: res
-                }
-                response.json(customRes);
-            }
-        });
+    db_connect.collection("records").insertOne(myobj, function (err, res) {
+        if (err) throw err;
+        console.log("1 document inserted");
+        response.json(res);
+    });
 });
 
 // This section will help you update a record by id.
