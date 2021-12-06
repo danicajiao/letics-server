@@ -56,6 +56,39 @@ recordRoutes.route("/users/:uid/workouts").get(function (req, response) {
         });
 });
 
+// This section will help you get a array of all the exercises by query string
+recordRoutes.route("/exercises/:searchQuery").get(function (req, response) {
+    let db_connect = dbo.getDb();
+    let myObj = {
+        searchQuery: req.params.searchQuery
+    };
+    console.log(myObj);
+
+    db_connect
+        .collection("exercises")
+        .createIndex({ exercise_name: "text", exercise_type: "text" });
+
+    db_connect
+        .collection("exercises")
+        .find({ $text: { $search: req.params.searchQuery } })
+        .toArray(function (err, result) {
+            if (err) throw err;
+            response.json(result);
+        });
+});
+
+// This section will help you get a array of all the exercises
+recordRoutes.route("/exercises/").get(function (req, response) {
+    let db_connect = dbo.getDb();
+    db_connect
+        .collection("exercises")
+        .find({})
+        .toArray(function (err, result) {
+            if (err) throw err;
+            response.json(result);
+        });
+});
+
 // This section will help delete a workout by id for the user
 recordRoutes.route("/users/:uid/workouts/:workout_id/delete").delete(function (req, response) {
     let db_connect = dbo.getDb();
