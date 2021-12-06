@@ -103,6 +103,42 @@ recordRoutes.route("/users/:uid/workouts/:workout_id/delete").delete(function (r
         });
 });
 
+// This section will help deactivate a user by id
+recordRoutes.route("/users/:uid/deactivate").delete(function (req, response) {
+    let db_connect = dbo.getDb();
+    let userQuery = { firebase_uid: req.params.uid };
+    db_connect
+        .collection("users")
+        .findOne(userQuery, function (err, res) {
+            if (err) throw err;
+            if (res) {
+                db_connect
+                    .collection("workouts")
+                    .deleteMany(
+                        { _id: { $in: res.workouts } },
+                        function (err, res) {
+                            if (err) throw err;
+                            // console.log("Workout added to user workout array");
+                            console.log("Deleted " + res.deletedCount + " documents from 'workouts' collection");
+                            // response.json(res);
+                        }
+                    );
+
+                db_connect
+                    .collection("users")
+                    .deleteOne(userQuery, function (err, result) {
+                        if (err) throw err;
+                        if (result.deletedCount === 1) {
+                            console.log("Successfully deleted user.");
+                        } else {
+                            console.log("No documents matched the query. Deleted 0 documents.");
+                        }
+                        response.json(result);
+                    });
+            }
+        });
+});
+
 // This section will help update a workout by id for the user
 recordRoutes.route("/users/:uid/workouts/:workout_id/update").put(function (req, response) {
     let db_connect = dbo.getDb();
